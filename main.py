@@ -69,11 +69,12 @@ if __name__ == '__main__':
     path = "/home/wei/active vision/active_vistion_RL/dataset"
 
     # Get an initial poistion.
-    train_set, test_set = acv_env.select_a_room(path)   # return dataset's path
-    curr_img, bbox = acv_env.get_ini_img_label(train_set)  # Get a initial image and label.
+    train_set, test_set = acv_env.select_a_room(path)   # select a dataset from random room
+    curr_img, bbox = acv_env.get_ini_img_label(train_set)  # get the initial image and bbox
 
-    # Run traing in a label in diff = 5.
-    action = "w"
+    action = "w" # give a action "forward"
+
+    # get the reward from current image and next image
     reward, curr_img = acv_env.env_image_and_label(train_set, curr_img, bbox, action)
 
     # main(env, task.max_timesteps)

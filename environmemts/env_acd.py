@@ -168,14 +168,14 @@ def get_ini_img_label(train_set):
         img = img[1:-1]
     return img, bbox
 
-if __name__ == '__main__':
-    path = "/home/wei/active vision/active_vistion_RL/dataset"
-    train_set, test_set = select_a_room(path) # select a dataset from random room
-    curr_img, bbox = get_ini_img_label(train_set) # get the initial image and bbox
-
-    action = "w" # give a action "forward"
-
-    # get the reward from current image and next image
-    reward, curr_img = env_image_and_label(train_set, curr_img, bbox, action)
+# if __name__ == '__main__':
+    # path = "/home/wei/active vision/active_vistion_RL/dataset"
+    # train_set, test_set = select_a_room(path) # select a dataset from random room
+    # curr_img, bbox = get_ini_img_label(train_set) # get the initial image and bbox
+    #
+    # action = "w" # give a action "forward"
+    #
+    # # get the reward from current image and next image
+    # reward, curr_img = env_image_and_label(train_set, curr_img, bbox, action)
 
 
