@@ -30,7 +30,7 @@ def run_acd():
             if stopping_criterion(next_diff, steps):
                 break
             steps += 1
-
+    # the following code are not sure how to write
     optimizer_spec = OptimizerSpec(
         constructor=rmsprop,
         kwargs=dict(lr=LEARNING_RATE, alpha=ALPHA, eps=EPS),

@@ -3,7 +3,6 @@ import json
 import random
 from collections import Counter
 
-
 class Active_vision_env():
     def __init__(self):
         super(Active_vision_env).__init__()
