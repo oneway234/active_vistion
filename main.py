@@ -2,7 +2,7 @@ from torch.optim import rmsprop
 from agents.dqn import DQN
 from learn.learn import OptimizerSpec, dqn_learing
 from utils.schedules import LinearSchedule
-import environmemts.env_acd as acv_env
+from environmemts.env_acd import Active_vision_env
 
 BATCH_SIZE = 32
 GAMMA = 0.99
@@ -15,33 +15,21 @@ LEARNING_RATE = 0.00025
 ALPHA = 0.95
 EPS = 0.01
 
-default_train_list = [
-                          'Home_002_1',
-                          'Home_003_1',
-                          'Home_003_2',
-                          'Home_004_1',
-                          'Home_004_2',
-                          'Home_005_1',
-                          'Home_005_2',
-                          'Home_006_1',
-                          'Home_014_1',
-                          'Home_014_2',
-                          'Office_001_1'
+def run_acd():
+    steps = 0
+    for episode in range(1000):
+        # initial observation
+        train_set, img, thing_label, diff = env.reset(episode) # observation:
+        while True:
+            # RL choose action based on observation
+            action = "RL.choose_action(img, thing_label, diff)"
 
-    ]
-default_test_list = [
-                          'Home_001_1',
-                          'Home_001_2',
-                          'Home_008_1'
-    ]
+            # RL take action and get next observation and reward
+            reward, next_img, next_diff = env.step(train_set, img, thing_label, diff, action)
 
-def main(env, num_timesteps):
-
-    def stopping_criterion(env):
-        # when return label = 1 for 3 times
-        # notice that here t is the number of steps of the wrapped env,
-        # which is different from the number of steps in the underlying env
-        return get_wrapper_by_name(env, "Monitor").get_total_steps() >= num_timesteps
+            if stopping_criterion(next_diff, steps):
+                break
+            steps += 1
 
     optimizer_spec = OptimizerSpec(
         constructor=rmsprop,
@@ -51,7 +39,7 @@ def main(env, num_timesteps):
     exploration_schedule = LinearSchedule(1000000, 0.1)
 
     dqn_learing(
-        env=env,
+        # env=env,
         q_func=DQN,
         optimizer_spec=optimizer_spec,
         exploration=exploration_schedule,
@@ -65,16 +53,11 @@ def main(env, num_timesteps):
         target_update_freq=TARGER_UPDATE_FREQ,
     )
 
+
+def stopping_criterion(next_diff, steps):
+    if next_diff == 1 or steps >= 100:
+        return True
+
+
 if __name__ == '__main__':
-    path = "/home/wei/active vision/active_vistion_RL/dataset"
-
-    # Get an initial poistion.
-    train_set, test_set = acv_env.select_a_room(path)   # select a dataset from random room
-    curr_img, bbox = acv_env.get_ini_img_label(train_set)  # get the initial image and bbox
-
-    action = "w" # give a action "forward"
-
-    # get the reward from current image and next image
-    reward, curr_img = acv_env.env_image_and_label(train_set, curr_img, bbox, action)
-
-    # main(env, task.max_timesteps)
+    env = Active_vision_env()
