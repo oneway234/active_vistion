@@ -1,39 +1,34 @@
-from torch.optim import rmsprop
-from agents.dqn import DQN
-from learn.learn import OptimizerSpec, dqn_learing
-from utils.schedules import LinearSchedule
 from environmemts.env_acd import Active_vision_env
-import torch
+from learn.dqn_learn import DQN
 
-import numpy as np
-import torch.nn as nn
-
-BATCH_SIZE = 32
-GAMMA = 0.99
-REPLAY_BUFFER_SIZE = 1000000
-LEARNING_STARTS = 50000
-LEARNING_FREQ = 4
-FRAME_HISTORY_LEN = 4
-TARGER_UPDATE_FREQ = 10000
-LEARNING_RATE = 0.00025
-ALPHA = 0.95
-EPS = 0.01
-
+MEMORY_CAPACITY = 2000
 def run_acd():
+    dqn = DQN()
     steps = 0
     for episode in range(1000):
         # initial observation
+        print("initial observation")
         train_set, img, thing_label, diff = env.reset(episode) # observation:
         while True:
             # RL choose action based on observation
-            action = "RL.choose_action(img, thing_label, diff)"
+            action = dqn.choose_action(img)
 
             # RL take action and get next observation and reward
             reward, next_img, next_diff = env.step(train_set, img, thing_label, diff, action)
 
+            s = img
+            s_ = next_img
+            r = reward
+            a = action
+            dqn.store_transition(s, a, r, s_)
+
+            if dqn.memory_counter > MEMORY_CAPACITY:
+                dqn.learn()  # 记忆库满了就进行学习
+
             if stopping_criterion(next_diff, steps):
                 break
             steps += 1
+            img = next_img
 
 
 def stopping_criterion(next_diff, steps):
@@ -43,3 +38,4 @@ def stopping_criterion(next_diff, steps):
 
 if __name__ == '__main__':
     env = Active_vision_env()
+    run_acd()

@@ -6,7 +6,7 @@ from collections import Counter
 class Active_vision_env():
     def __init__(self):
         super(Active_vision_env).__init__()
-        self.action_space = ['w', 'a', 's', 'd', 'e', 'r', 'h']
+        self.action_space = [0, 1, 2, 3, 4, 5, 6]
         self.n_actions = len(self.action_space)
         self.n_feature = 'image w*h'
         self.path = "/home/wei/active vision/active_vistion_RL/dataset"
@@ -96,19 +96,19 @@ class Active_vision_env():
         if action:
             # get the next image name to display based on the
             # user input, and the annotation.
-            if action == 'w':
+            if action == 0:
                 next_image_name = annotations[curr_img]['forward']
-            elif action == 'a':
+            elif action == 1:
                 next_image_name = annotations[curr_img]['rotate_ccw']
-            elif action == 's':
+            elif action == 2:
                 next_image_name = annotations[curr_img]['backward']
-            elif action == 'd':
+            elif action == 3:
                 next_image_name = annotations[curr_img]['rotate_cw']
-            elif action == 'e':
+            elif action == 4:
                 next_image_name = annotations[curr_img]['left']
-            elif action == 'r':
+            elif action == 5:
                 next_image_name = annotations[curr_img]['right']
-            elif action == 'h':
+            elif action == 6:
                 next_image_name = curr_img
         reward = 0
         cur_diff = diff
@@ -188,15 +188,7 @@ class Active_vision_env():
         return train_set, test_set
 
 
-# if __name__ == '__main__':
-    # env = Active_vision_env()
-    # for i in range(10):
-    #     env.reset(i)
-    # train_set, test_set = select_a_room(path) # select a dataset from random room
-    # curr_img, bbox = get_ini_img_label(train_set) # get the initial image and bbox
-    #
-    # action = "w" # give a action "forward"
-    # # get the reward from current image and next image
-    # reward, curr_img = env_image_and_label(train_set, curr_img, bbox, action)
+if __name__ == '__main__':
+    print(random.randint(0, 7))
 
 

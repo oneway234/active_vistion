@@ -10,11 +10,8 @@ EPSILON = 0.9               # greedy policy
 GAMMA = 0.9                 # reward discount
 TARGET_REPLACE_ITER = 100   # target update frequency
 MEMORY_CAPACITY = 2000
-env = gym.make('CartPole-v0')
-env = env.unwrapped
-N_ACTIONS = env.action_space.n
-N_STATES = env.observation_space.shape[0]
-ENV_A_SHAPE = 0 if isinstance(env.action_space.sample(), int) else env.action_space.sample().shape     # to confirm the shape
+N_ACTIONS = 7
+N_STATES = 3*1920*1080 #這裡不確定，圖片大小為1920*1080 若是3*1920*1080的話會顯示記憶體不足
 
 class DQN(object):
     def __init__(self):
@@ -27,15 +24,13 @@ class DQN(object):
         self.loss_func = nn.MSELoss()
 
     def choose_action(self, x):
-        x = torch.unsqueeze(torch.FloatTensor(x), 0)
+        x = torch.unsqueeze(torch.FloatTensor(x), 0) #若輸入為圖片？
         # input only one sample
         if np.random.uniform() < EPSILON:   # greedy
             actions_value = self.eval_net.forward(x)
             action = torch.max(actions_value, 1)[1].data.numpy()
-            action = action[0] if ENV_A_SHAPE == 0 else action.reshape(ENV_A_SHAPE)  # return the argmax index
         else:   # random
-            action = np.random.randint(0, N_ACTIONS)
-            action = action if ENV_A_SHAPE == 0 else action.reshape(ENV_A_SHAPE)
+            action = np.random.randint(0, N_ACTIONS-1)
         return action
 
     def store_transition(self, s, a, r, s_):
@@ -68,35 +63,3 @@ class DQN(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
-dqn = DQN()
-
-print('\nCollecting experience...')
-for i_episode in range(400):
-    s = env.reset()
-    ep_r = 0
-    while True:
-        env.render()
-        a = dqn.choose_action(s)
-
-        # take action
-        s_, r, done, info = env.step(a)
-
-        # modify the reward
-        x, x_dot, theta, theta_dot = s_
-        r1 = (env.x_threshold - abs(x)) / env.x_threshold - 0.8
-        r2 = (env.theta_threshold_radians - abs(theta)) / env.theta_threshold_radians - 0.5
-        r = r1 + r2
-
-        dqn.store_transition(s, a, r, s_)
-
-        ep_r += r
-        if dqn.memory_counter > MEMORY_CAPACITY:
-            dqn.learn()
-            if done:
-                print('Ep: ', i_episode,
-                      '| Ep_r: ', round(ep_r, 2))
-
-        if done:
-            break
-        s = s_
