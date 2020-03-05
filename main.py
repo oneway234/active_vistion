@@ -3,6 +3,10 @@ from agents.dqn import DQN
 from learn.learn import OptimizerSpec, dqn_learing
 from utils.schedules import LinearSchedule
 from environmemts.env_acd import Active_vision_env
+import torch
+
+import numpy as np
+import torch.nn as nn
 
 BATCH_SIZE = 32
 GAMMA = 0.99
@@ -30,28 +34,6 @@ def run_acd():
             if stopping_criterion(next_diff, steps):
                 break
             steps += 1
-    # the following code are not sure how to write
-    optimizer_spec = OptimizerSpec(
-        constructor=rmsprop,
-        kwargs=dict(lr=LEARNING_RATE, alpha=ALPHA, eps=EPS),
-    )
-
-    exploration_schedule = LinearSchedule(1000000, 0.1)
-
-    dqn_learing(
-        # env=env,
-        q_func=DQN,
-        optimizer_spec=optimizer_spec,
-        exploration=exploration_schedule,
-        stopping_criterion=stopping_criterion,
-        replay_buffer_size=REPLAY_BUFFER_SIZE,
-        batch_size=BATCH_SIZE,
-        gamma=GAMMA,
-        learning_starts=LEARNING_STARTS,
-        learning_freq=LEARNING_FREQ,
-        frame_history_len=FRAME_HISTORY_LEN,
-        target_update_freq=TARGER_UPDATE_FREQ,
-    )
 
 
 def stopping_criterion(next_diff, steps):
