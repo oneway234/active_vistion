@@ -1,5 +1,8 @@
 from environmemts.env_acd import Active_vision_env
 from learn.dqn_learn import DQN
+import os
+import cv2
+import numpy as np
 
 MEMORY_CAPACITY = 2000
 def run_acd():
@@ -11,7 +14,11 @@ def run_acd():
         train_set, img, thing_label, diff = env.reset(episode) # observation:
         while True:
             # RL choose action based on observation
-            action = dqn.choose_action(img)
+            inimg = os.path.join(train_set,'jpg_rgb', img)
+            # inimg = Image.open(inimg).convert('RGB')
+            inimg = cv2.imread(inimg)
+            inimg = np.transpose(inimg, (2, 0, 1))
+            action = dqn.choose_action(inimg)
 
             # RL take action and get next observation and reward
             reward, next_img, next_diff = env.step(train_set, img, thing_label, diff, action)
