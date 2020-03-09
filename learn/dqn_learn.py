@@ -24,14 +24,19 @@ class DQN(object):
         self.loss_func = nn.MSELoss()
 
     def choose_action(self, x):
-        x = torch.unsqueeze(torch.FloatTensor(x), 0) #若輸入為圖片？不知道怎麼改，顯示只接受str
+        # x = torch.unsqueeze(torch.FloatTensor(x), 0)
         # input only one sample
         if np.random.uniform() < EPSILON:   # greedy
-            actions_value = self.eval_net.forward(x)
+            actions_value, _ = self.eval_net.forward(x)
             action = torch.max(actions_value, 1)[1].data.numpy()
         else:   # random
             action = np.random.randint(0, N_ACTIONS-1)
         return action
+
+    def img_feature(self, x):
+        x = torch.unsqueeze(torch.FloatTensor(x), 0)
+        _, feature = self.eval_net.forward(x)
+        return feature
 
     def store_transition(self, s, a, r, s_):
         transition = np.hstack((s, [a, r], s_))
