@@ -15,7 +15,7 @@ def run_acd():
         train_set, img, thing_label, diff = env.reset(episode) # observation:
         while True:
             # RL choose action based on observation
-            inimg = os.path.join(train_set, 'jpg_rgb', img)#read curr img
+            inimg = os.path.join(train_set, 'jpg_rgb', img)#read curr image
             inimg = read_img(inimg)
             print("choose action...")
             action = dqn.choose_action(inimg) #choose action
