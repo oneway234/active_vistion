@@ -11,11 +11,11 @@ GAMMA = 0.9                 # reward discount
 TARGET_REPLACE_ITER = 100   # target update frequency
 MEMORY_CAPACITY = 2000
 N_ACTIONS = 7
-N_STATES = 1
+N_STATES = 512
 
 class DQN(object):
     def __init__(self):
-        self.eval_net, self.target_net = net.DQN(), net.DQN()
+        self.eval_net, self.target_net = net.DQN().cuda(), net.DQN().cuda()
 
         self.learn_step_counter = 0                                     # for target updating
         self.memory_counter = 0                                         # for storing memory
@@ -26,20 +26,22 @@ class DQN(object):
     def choose_action(self, x):
         # x = torch.unsqueeze(torch.FloatTensor(x), 0)
         # input only one sample
+        x = x.cuda()
         if np.random.uniform() < EPSILON:   # greedy
             actions_value, _ = self.eval_net.forward(x)
-            action = torch.max(actions_value, 1)[1].data.numpy()
+            action = torch.max(actions_value, 1)[1].cuda().data.numpy()
         else:   # random
             action = np.random.randint(0, N_ACTIONS-1)
         return action
 
-    def img_feature(self, x):
-        x = torch.unsqueeze(torch.FloatTensor(x), 0)
-        _, feature = self.eval_net.forward(x)
-        return feature
-
     def store_transition(self, s, a, r, s_):
-        transition = np.hstack((s, [a, r], s_))
+        s = s.detach().numpy()
+        s_ = s_.detach().numpy()
+        s = s.ravel()
+        s_ = s_.ravel()
+        ar = np.append(a, r)
+        print("s", s, "\na:", a, "\nr:", r, "\ns:", s_)
+        transition = np.hstack((s, ar, s_))
         # replace the old memory with new memory
         index = self.memory_counter % MEMORY_CAPACITY
         self.memory[index, :] = transition

@@ -69,6 +69,7 @@ class DQN(object):
         return action
 
     def store_transition(self, s, a, r, s_):
+        print("s", s, "\na:", a, "\nr:", r, "\ns:", s_)
         transition = np.hstack((s, [a, r], s_))
         # replace the old memory with new memory
         index = self.memory_counter % MEMORY_CAPACITY

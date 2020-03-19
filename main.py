@@ -18,8 +18,10 @@ def run_acd():
             inimg = os.path.join(train_set, 'jpg_rgb', img)#read curr image
             inimg = read_img(inimg)
             print("choose action...")
-            action = dqn.choose_action(inimg) #choose action
-            curr_s = dqn.eval_net.forward(inimg) #input img into net
+            #!!!!!!!#
+            with torch.no_grad():
+                action = dqn.choose_action(inimg) #choose action
+                _, curr_s = dqn.eval_net.forward(inimg) #input img into net
 
 
             # RL take action and get next observation and reward
@@ -28,17 +30,20 @@ def run_acd():
 
             inextimg = os.path.join(train_set, 'jpg_rgb', next_img)  # read next img
             inextimg = read_img(inextimg)
-            next_s = dqn.eval_net.forward(inextimg)
+            #!!!!!!!!!!!!!!#
+            with torch.no_grad():
+                _, next_s = dqn.eval_net.forward(inextimg)#get next stste
 
-            s = curr_s
-            s_ = next_s
-            r = reward
-            a = action
+            s = curr_s.cuda()
+            s_ = next_s.cuda()
+            r = reward.cuda()
+            a = action.cuda()
             print("store")
-            print("s", type(s), "\na:", a, "\nr:", r, "\ns:", s_)
+
             dqn.store_transition(s, a, r, s_)
 
             if dqn.memory_counter > MEMORY_CAPACITY:
+                print("Learning ...")
                 dqn.learn()  # 记忆库满了就进行学习
 
             if stopping_criterion(next_diff, steps):
@@ -61,4 +66,7 @@ def stopping_criterion(next_diff, steps):
 
 if __name__ == '__main__':
     env = Active_vision_env()
-    run_acd()
+    cuda_gpu = torch.cuda.is_available()
+    if (cuda_gpu):
+        print('gpu')
+        run_acd()
