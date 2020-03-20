@@ -53,15 +53,15 @@ class DQN(object):
         self.loss_func = nn.MSELoss()
 
     def choose_action(self, x):
-        print("X =", x ,"type =", type(x))
+        # print("X =", x ,"type =", type(x))
         x = torch.unsqueeze(torch.FloatTensor(x), 0)
-        print(x)
+        # print(x)
         # input only one sample
         if np.random.uniform() < EPSILON:   # greedy
             actions_value = self.eval_net.forward(x)
-            print("actions_value =", actions_value)
+            # print("actions_value =", actions_value)
             action = torch.max(actions_value, 1)[1].data.numpy()
-            print("action =" ,action)
+            # print("action =", action)
             action = action[0] if ENV_A_SHAPE == 0 else action.reshape(ENV_A_SHAPE)  # return the argmax index
         else:   # random
             action = np.random.randint(0, N_ACTIONS)
@@ -69,8 +69,9 @@ class DQN(object):
         return action
 
     def store_transition(self, s, a, r, s_):
-        print("s", s, "\na:", a, "\nr:", r, "\ns:", s_)
+
         transition = np.hstack((s, [a, r], s_))
+        print(transition)
         # replace the old memory with new memory
         index = self.memory_counter % MEMORY_CAPACITY
         self.memory[index, :] = transition
@@ -131,3 +132,4 @@ for i_episode in range(400):
         if done:
             break
         s = s_
+
