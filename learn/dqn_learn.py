@@ -35,10 +35,6 @@ class DQN(object):
             action = np.random.randint(0, N_ACTIONS-1)
         return action
 
-    def img_feature(self, x):
-        feature = self.feature_net.forward(x)
-        return feature
-
     def store_transition(self, s, a, r, s_):
         s = s.detach().numpy()
         s_ = s_.detach().numpy()
