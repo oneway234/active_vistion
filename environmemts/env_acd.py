@@ -77,7 +77,8 @@ class Active_vision_env():
             img = img[1:-1]
             thing_label = int(bbox[-2])
             diff = int(bbox[-1])
-        return train_set, img, thing_label, diff
+            bbox = bbox[0:4]
+        return train_set, img, thing_label, diff, bbox
 
     def step(self, train_set, curr_img, thing_label, diff, action):
 
@@ -111,31 +112,46 @@ class Active_vision_env():
             elif action == 6:
                 next_image_name = curr_img
         reward = 0
+        next_bbox = []
         cur_diff = diff
         if next_image_name != '':
             if next_image_name != curr_img:
-                next_diff = Active_vision_env.count_diff(self, train_set
+                next_diff, next_bbox = Active_vision_env.bbox_diff(self, train_set
                                                          , next_image_name, thing_label)
 
                 if next_diff == -1: # Nothing in img
                     cur_diff = 6
                     reward = -1
                 elif next_diff < cur_diff != -1: # Get better
-                    cur_diff =next_diff
+                    cur_diff = next_diff
                     reward = 1
                 elif next_diff > cur_diff != -1: # Worse
                     cur_diff = next_diff
                     reward = -1
-                elif next_diff == cur_diff != -1: # No change
+                elif next_diff == cur_diff != -1 != 6: # No change
                     reward = 0
 
-            elif next_image_name == cur_image_name:
-                reward = 0
+            elif next_image_name == curr_img:
+                if cur_diff == 6:
+                    reward = -1
+                elif cur_diff == 1:
+                    reward = 1
+                else:
+                    reward = 0
+
             curr_img = next_image_name
 
-        return reward, curr_img, cur_diff
+        elif next_image_name == '':
+            if cur_diff == 6:
+                reward = -1
+            elif cur_diff == 1:
+                reward = 1
+            else:
+                reward = 0
 
-    def count_diff(self, train_set, img, thing_label):
+        return reward, curr_img, cur_diff, next_bbox
+
+    def bbox_diff(self, train_set, img, thing_label):
         # set up curr_img and json paths
         annotations_path = os.path.join(train_set, 'annotations.json')
 
@@ -145,18 +161,21 @@ class Active_vision_env():
 
         # set up for first image
         diff = 0
+        bbox = []
         boxes = annotations[img]['bounding_boxes']
         if boxes:
             for i in boxes:
                 if i[-2] == thing_label:
                     diff = i[-1]
+                    bbox = i[0:4]
                     break
-                if diff == 0:
-                    diff = -1
+            if diff == 0:
+                diff = -1
+                bbox = [0, 0, 0, 0]
         else:
             diff = -1#
-
-        return diff
+            bbox = [0, 0, 0, 0]
+        return diff, bbox
 
     def select_a_room(self, num): # each epison select a new room
         default_train_list = [
